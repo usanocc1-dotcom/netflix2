@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix - Update Billing Information</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f3f3f3;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .header {
+            background-color: white;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e6e6e6;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .netflix-logo {
+            color: #e50914;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: -1px;
+        }
+
+        .sign-out {
+            color: #999;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            padding: 8px 12px;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .sign-out:hover {
+            color: #333;
+            background-color: rgba(0, 0, 0, 0.05);
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+        .sign-out:active {
+            color: #000;
+            background-color: rgba(0, 0, 0, 0.1);
+            transform: translateY(0);
+            transition: all 0.1s ease;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .main-heading {
+            font-size: 32px;
+            font-weight: 400;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* Enhanced input styling with better focus states and validation */
+        input[type="text"], input[type="tel"], input[type="email"] {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid #8c8c8c;
+            border-radius: 2px;
+            font-size: 16px;
+            background-color: white;
+            color: #333;
+            transition: all 0.2s ease;
+            transform: translateY(0);
+        }
+
+        input[type="text"]:hover, input[type="tel"]:hover, input[type="email"]:hover {
+            border-color: #666;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"]:focus, input[type="tel"]:focus, input[type="email"]:focus {
+            outline: none;
+            border-color: #0071eb;
+            box-shadow: 0 0 0 2px rgba(0, 113, 235, 0.2), 0 2px 8px rgba(0, 113, 235, 0.1);
+            transform: translateY(-1px);
+        }
+
+        input[type="text"]:active, input[type="tel"]:active, input[type="email"]:active {
+            transform: translateY(0);
+        }
+
+        input.error {
+            border-color: #e50914;
+            box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.2);
+        }
+
+        input.valid {
+            border-color: #46d369;
+        }
+
+        input::placeholder {
+            color: #8c8c8c;
+        }
+
+        /* Added error message styling */
+        .error-message {
+            color: #e50914;
+            font-size: 13px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .payment-section {
+            margin-top: 40px;
+        }
+
+        .section-heading {
+            font-size: 24px;
+            font-weight: 400;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .billing-info {
+            color: #0071eb;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        /* Enhanced payment method icons with real card logos */
+        .payment-methods {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            align-items: center;
+            /* Fixed positioning to prevent movement */
+            position: static;
+            height: 32px;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .payment-icon {
+            width: 40px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            border: 1px solid #ddd;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            /* Fixed positioning and prevented layout shifts */
+            position: static;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            transform: scale(1);
+            flex-shrink: 0;
+            min-width: 40px;
+            min-height: 24px;
+        }
+
+        /* More realistic Visa logo styling */
+        .visa { 
+            background: linear-gradient(135deg, #1a1f71 0%, #0f4c75 100%);
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* More realistic MasterCard logo with overlapping circles */
+        .mastercard { 
+            background: #000;
+            /* Fixed positioning to prevent movement */
+            position: static;
+            font-size: 0;
+            min-width: 40px;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mastercard::before,
+        .mastercard::after {
+            content: '';
+            /* Fixed absolute positioning within the container */
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .mastercard::before {
+            background: #eb001b;
+            /* Fixed left positioning */
+            left: 8px;
+        }
+
+        .mastercard::after {
+            background: #ff5f00;
+            /* Fixed left positioning */
+            left: 20px;
+        }
+
+        /* More realistic American Express logo */
+        .amex { 
+            background: linear-gradient(135deg, #006fcf 0%, #0099cc 100%);
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 8px;
+            letter-spacing: 0.2px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* More realistic Discover logo */
+        .discover { 
+            background: linear-gradient(135deg, #ff6000 0%, #ff9500 100%);
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 7px;
+            letter-spacing: 0.3px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* More realistic Diners Club logo */
+        .diners { 
+            background: linear-gradient(135deg, #0079be 0%, #00a0e6 100%);
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 6px;
+            letter-spacing: 0.2px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .diners::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            border: 1px solid white;
+            border-radius: 2px;
+        }
+
+        /* Enhanced card icon with more realistic styling */
+        .card-icon {
+            /* Fixed absolute positioning within input container */
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: bold;
+            color: #666;
+            transition: all 0.2s ease;
+            font-family: Arial, sans-serif;
+            cursor: pointer;
+            z-index: 10;
+            pointer-events: none;
+            /* Prevent layout shifts */
+            flex-shrink: 0;
+        }
+
+        .card-icon.mastercard {
+            background: #000;
+            color: transparent;
+            /* Fixed relative positioning for pseudo-elements */
+            position: absolute;
+            min-width: 32px;
+            min-height: 20px;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .card-icon.mastercard::before,
+        .card-icon.mastercard::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .card-icon.mastercard::before {
+            background: #eb001b;
+            left: 6px;
+        }
+
+        .card-icon.mastercard::after {
+            background: #ff5f00;
+            left: 18px;
+        }
+
+        .security-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+        }
+
+        .security-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            background-color: #28a745;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+        }
+
+        .security-text {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #e9ecef;
+            border-radius: 2px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #e50914;
+            width: 75%;
+            transition: width 0.3s ease;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .continue-btn {
+            width: 100%;
+            padding: 16px 24px;
+            background-color: #e50914;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(229, 9, 20, 0.2);
+            transform: translateY(0);
+        }
+
+        .continue-btn:hover {
+            background-color: #f40612;
+            box-shadow: 0 4px 8px rgba(229, 9, 20, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .continue-btn:active {
+            background-color: #d40813;
+            box-shadow: 0 1px 2px rgba(229, 9, 20, 0.4);
+            transform: translateY(1px);
+            transition: all 0.1s ease;
+        }
+
+        .continue-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.3);
+        }
+
+        .continue-btn:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .continue-btn.loading {
+            background-color: #c7070f;
+            cursor: wait;
+            color: transparent;
+        }
+
+        .continue-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            transform: translate(-50%, -50%);
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 20px;
+            }
+            
+            .netflix-logo {
+                font-size: 24px;
+            }
+            
+            .container {
+                margin: 20px auto;
+            }
+            
+            .main-heading {
+                font-size: 24px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="netflix-logo">NETFLIX</div>
+        <a href="#" class="sign-out">Sign out</a>
+    </header>
+
+    <div class="container">
+        <!-- Added progress indicator -->
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+
+        <h1 class="main-heading">Update your billing information.</h1>
+        
+        <form id="billingForm" novalidate>
+            <div class="form-group">
+                <input type="text" placeholder="First Name" id="firstName" required>
+                <div class="error-message">Please enter your first name.</div>
+            </div>
+            
+            <div class="form-group">
+                <input type="text" placeholder="Last Name" id="lastName" required>
+                <div class="error-message">Please enter your last name.</div>
+            </div>
+            
+            <div class="form-group">
+                <input type="text" placeholder="Address" id="address" required>
+                <div class="error-message">Please enter your address.</div>
+            </div>
+            
+            <div class="form-group">
+                <input type="text" placeholder="City" id="city" required>
+                <div class="error-message">Please enter your city.</div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <input type="text" placeholder="State" id="state" required>
+                    <div class="error-message">Please enter your state.</div>
+                </div>
+                <div class="form-group">
+                    <input type="text" placeholder="Zip" id="zip" required>
+                    <div class="error-message">Please enter your zip code.</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <input type="tel" placeholder="Phone" id="phone" required>
+                <div class="error-message">Please enter a valid phone number.</div>
+            </div>
+
+            <div class="payment-section">
+                <h2 class="section-heading">Update your payment information.</h2>
+                <p class="billing-info">Your monthly membership is billed on the first day of each billing period.</p>
+                
+                <div class="payment-methods">
+                    <div class="payment-icon visa">VISA</div>
+                    <div class="payment-icon mastercard"></div>
+                    <div class="payment-icon amex">AMEX</div>
+                    <div class="payment-icon discover">DISCOVER</div>
+                    <div class="payment-icon diners">DINERS</div>
+                </div>
+                
+                <div class="form-group credit-card-group">
+                    <!-- Added relative positioning container for stable card icon -->
+                    <div style="position: relative; width: 100%;">
+                        <input type="text" placeholder="Credit Card" id="creditCard" required>
+                        <div class="card-icon" id="cardIcon">CARD</div>
+                    </div>
+                    <div class="error-message">Please enter a valid credit card number.</div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="text" placeholder="MM" id="month" maxlength="2" required>
+                        <div class="error-message">Invalid month.</div>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" placeholder="YY" id="year" maxlength="2" required>
+                        <div class="error-message">Invalid year.</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <input type="text" placeholder="Security Code (CVV)" id="cvv" maxlength="4" required>
+                    <div class="error-message">Please enter a valid security code.</div>
+                </div>
+
+                <!-- Added security information -->
+                <div class="security-info">
+                    <div class="security-icon">🔒</div>
+                    <div class="security-text">Your payment information is encrypted and secure</div>
+                </div>
+                
+                <button type="submit" class="continue-btn" id="submitBtn">Continue</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('billingForm');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // Card type detection
+        function detectCardType(number) {
+            const patterns = {
+                visa: /^4/,
+                mastercard: /^5[1-5]/,
+                amex: /^3[47]/,
+                discover: /^6(?:011|5)/
+            };
+            
+            for (let type in patterns) {
+                if (patterns[type].test(number)) {
+                    return type;
+                }
+            }
+            return null;
+        }
+
+        // Enhanced credit card formatting and validation
+        document.getElementById('creditCard').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            
+            if (formattedValue !== e.target.value) {
+                e.target.value = formattedValue;
+            }
+
+            const cardIcon = document.getElementById('cardIcon');
+            const cardType = detectCardType(value);
+            
+            cardIcon.className = 'card-icon';
+            if (cardType) {
+                cardIcon.classList.add(cardType);
+                if (cardType === 'mastercard') {
+                    cardIcon.textContent = '';
+                } else {
+                    cardIcon.textContent = cardType.toUpperCase();
+                }
+                
+                document.querySelectorAll('.payment-icon').forEach(icon => {
+                    icon.classList.remove('selected');
+                });
+                const matchingIcon = document.querySelector(`.payment-icon.${cardType}`);
+                if (matchingIcon) {
+                    matchingIcon.classList.add('selected');
+                }
+            } else {
+                cardIcon.textContent = 'CARD';
+                document.querySelectorAll('.payment-icon').forEach(icon => {
+                    icon.classList.remove('selected');
+                });
+            }
+
+            validateField(e.target, value.length >= 13 && value.length <= 19);
+        });
+
+        // Enhanced month validation
+        document.getElementById('month').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            if (value.length === 1 && parseInt(value) > 1) {
+                value = '0' + value;
+            }
+            if (value.length === 2 && parseInt(value) > 12) {
+                value = '12';
+            }
+            e.target.value = value;
+            validateField(e.target, value.length === 2 && parseInt(value) >= 1 && parseInt(value) <= 12);
+        });
+
+        // Enhanced year validation
+        document.getElementById('year').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            e.target.value = value;
+            
+            if (value.length === 2) {
+                const currentYear = new Date().getFullYear() % 100;
+                const inputYear = parseInt(value);
+                validateField(e.target, inputYear >= currentYear && inputYear <= currentYear + 20);
+            }
+        });
+
+        // Enhanced CVV validation
+        document.getElementById('cvv').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            e.target.value = value;
+            validateField(e.target, value.length >= 3 && value.length <= 4);
+        });
+
+        // Enhanced phone formatting
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 6) {
+                value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+            } else if (value.length >= 3) {
+                value = value.replace(/(\d{3})(\d{0,3})/, '($1) $2');
+            }
+            e.target.value = value;
+            validateField(e.target, value.replace(/\D/g, '').length === 10);
+        });
+
+        // Zip code validation
+        document.getElementById('zip').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            e.target.value = value;
+            validateField(e.target, value.length === 5);
+        });
+
+        // Generic field validation
+        function validateField(field, isValid) {
+            const errorMsg = field.parentNode.querySelector('.error-message');
+            
+            if (isValid) {
+                field.classList.remove('error');
+                field.classList.add('valid');
+                errorMsg.classList.remove('show');
+            } else if (field.value.length > 0) {
+                field.classList.add('error');
+                field.classList.remove('valid');
+                errorMsg.classList.add('show');
+                field.style.animation = 'shake 0.5s ease';
+                setTimeout(() => field.style.animation = '', 500);
+            } else {
+                field.classList.remove('error', 'valid');
+                errorMsg.classList.remove('show');
+            }
+        }
+
+        // Real-time validation for text fields
+        ['firstName', 'lastName', 'address', 'city', 'state'].forEach(id => {
+            document.getElementById(id).addEventListener('input', function(e) {
+                validateField(e.target, e.target.value.trim().length >= 2);
+            });
+        });
+
+        // Enhanced form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Add ripple effect to submit button
+            addRippleEffect(submitBtn);
+            
+            // Validate all fields
+            const fields = form.querySelectorAll('input[required]');
+            let isValid = true;
+            
+            fields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('error');
+                    field.parentNode.querySelector('.error-message').classList.add('show');
+                    // Add shake animation to invalid fields
+                    field.style.animation = 'shake 0.5s ease';
+                    setTimeout(() => field.style.animation = '', 500);
+                    isValid = false;
+                }
+            });
+
+            if (isValid) {
+                // Show loading state with enhanced animation
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+                
+                // Add success animation to form
+                form.style.transform = 'scale(0.98)';
+                form.style.opacity = '0.8';
+                
+                // Simulate API call
+                setTimeout(() => {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                    form.style.transform = 'scale(1)';
+                    form.style.opacity = '1';
+                    
+                    // Success feedback
+                    submitBtn.textContent = 'Success!';
+                    submitBtn.style.backgroundColor = '#28a745';
+                    setTimeout(() => {
+                        submitBtn.textContent = 'Continue';
+                        submitBtn.style.backgroundColor = '#e50914';
+                    }, 2000);
+                }, 2000);
+            } else {
+                // Enhanced error feedback
+                const firstError = form.querySelector('.error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            }
+        });
+
+        document.querySelector('.sign-out').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Add click animation
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 100);
+            
+            if (confirm('Are you sure you want to sign out? Any unsaved changes will be lost.')) {
+                // Enhanced loading animation
+                document.body.style.transition = 'opacity 0.5s ease';
+                document.body.style.opacity = '0.3';
+                
+                setTimeout(() => {
+                    alert('Signed out! (This is just a demo)');
+                    document.body.style.opacity = '1';
+                }, 1000);
+            }
+        });
+
+        // Auto-save functionality (simulated)
+        let autoSaveTimeout;
+        form.addEventListener('input', function() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                console.log('Auto-saving form data...');
+                // In a real app, this would save to localStorage or send to server
+            }, 2000);
+        });
+
+        function addRippleEffect(button) {
+            button.classList.add('ripple');
+            setTimeout(() => {
+                button.classList.remove('ripple');
+            }, 600);
+        }
+
+        document.querySelectorAll('.payment-icon').forEach(icon => {
+            icon.addEventListener('click', function() {
+                document.querySelectorAll('.payment-icon').forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                this.style.animation = 'bounce 0.3s ease';
+                setTimeout(() => {
+                    this.style.animation = '';
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>
